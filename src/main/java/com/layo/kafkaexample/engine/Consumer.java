@@ -8,3 +8,24 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
+
+
+@Service
+@ConditionalOnProperty(value = "example.kafka.consumer-enabled", havingValue = "true")
+public  class Consumer {
+    private  final Logger logger = LoggerFactory.getLogger(Consumer.class);
+
+    @KafkaListener(topics =  {"INPUT_DATA"})
+    public void consume(final @Payload String message,
+                        final @Header(KafkaHeaders.OFFSET) Integer offset,
+                        final @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) String key,
+                        final @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partiton,
+                        final @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
+                        final @Header(KafkaHeaders.RECEIVED_TIMESTAMP) long ts,
+                        final Acknowledgment acknowledgment
+    ) {
+        logger.info(String.format("#### -> Consume message -> TIMESTAMP: %d\n%s\noffset: %d\nkey: %s\npartition: %d\ntopic:%s", ts, message,offset,key,partiton, topic));
+        acknowledgment.acknowledge();
+    }
+
+}
